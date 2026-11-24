@@ -1,0 +1,52 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Light Garden</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
+canvas{position:fixed;inset:0;width:100%;height:100%;touch-action:manipulation}
+.top{position:fixed;z-index:2;top:0;height:10.5%;min-height:64px;width:100%;background:#171717;color:#eee;display:flex;align-items:center;justify-content:center;font:600 clamp(19px,4vw,30px) Arial}
+.x{position:absolute;left:7%;font:36px Arial;font-weight:200}.dots{position:absolute;right:8%;font:30px Arial}
+.caption{position:fixed;bottom:8%;width:100%;text-align:center;color:#f8d7f8;font:clamp(40px,9vw,66px) 'Great Vibes',cursive;text-shadow:0 0 12px #e879ff,0 0 35px #e879ff88;pointer-events:none;transition:1s}
+.hint{position:fixed;bottom:3.5%;width:100%;text-align:center;font:10px Arial;letter-spacing:2px;color:#bca6c8;opacity:.6;pointer-events:none}
+body.play .caption{opacity:0;transform:translateY(20px)}body.play .hint{opacity:0}
+</style></head><body>
+<div class="top"><span class="x">×</span>Light Garden<span class="dots">⋮</span></div>
+<canvas id="c"></canvas><div class="caption">just for u bamisho</div><div class="hint">TAP THE BOUQUET ✨</div>
+<script>
+const c=document.getElementById('c'),g=c.getContext('2d');let W,H,D,t=0,started=false;
+const tw=[],spark=[],fl=[],but=[];
+const colors=['#ff4edb','#d46bff','#a34dff','#ffb44f','#ffe58b','#fff4dc','#ff6ba8'];
+const R=(a,b)=>a+Math.random()*(b-a);
+function size(){D=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;c.width=W*D;c.height=H*D;c.style.width=W+'px';c.style.height=H+'px';g.setTransform(D,0,0,D,0,0);build()}
+function build(){
+ tw.length=spark.length=fl.length=but.length=0;
+ [.15,.22,.34,.59,.79,.96].forEach((p,i)=>{let x=W*p,base=H*.705,ht=H*R(.27,.58),wd=R(12,26);tw.push({x,base,ht,wd});
+ for(let j=0;j<700;j++)spark.push({x:x+R(-wd,wd),y:base-Math.random()*ht,s:R(.6,2.5),ph:R(0,8),col:colors[Math.floor(R(0,colors.length))],a:R(.25,1)})});
+ const x=W*.5,y=H*.535,k=Math.min(W/390,1.1);
+ [[-82,-42,31],[ -30,-105,30],[35,-63,38],[78,-25,28],[-54,18,31],[25,38,27],[0,-5,43]].forEach((p,i)=>fl.push({x:x+p[0]*k,y:y+p[1]*k,r:p[2]*k,ph:R(0,7)}));
+ for(let i=0;i<9;i++)but.push({x:R(W*.12,W*.94),y:R(H*.18,H*.58),vx:R(-.25,.25),vy:R(-.3,.25),s:R(.42,.8),col:['#ffe28b','#d2b9ff','#8fcaff','#ffb5df'][i%4],ph:R(0,7),z:0});
+}
+function petal(x,y,r,a){g.save();g.translate(x,y);g.rotate(a);let q=g.createLinearGradient(0,-r*1.5,0,0);q.addColorStop(0,'#fffef0');q.addColorStop(.5,'#fff0a1');q.addColorStop(1,'#efbd53');g.fillStyle=q;g.strokeStyle='#fff8d8';g.lineWidth=.7;g.beginPath();g.moveTo(0,0);g.lineTo(-r*.33,-r*.42);g.quadraticCurveTo(-r*.6,-r*1.45,0,-r*1.55);g.quadraticCurveTo(r*.6,-r*1.45,r*.33,-r*.42);g.closePath();g.fill();g.stroke();g.restore()}
+function sunflower(f){let x=f.x,y=f.y+Math.sin(t+f.ph)*2,r=f.r;for(let i=0;i<26;i++)petal(x,y,r,i*Math.PI*2/26);
+ let rr=r*.73,q=g.createRadialGradient(x-rr*.2,y-rr*.2,1,x,y,rr);q.addColorStop(0,'#9b5b32');q.addColorStop(.65,'#61341f');q.addColorStop(1,'#2c1715');g.fillStyle=q;g.beginPath();g.arc(x,y,rr,0,7);g.fill();
+ g.strokeStyle='#c18a51';g.lineWidth=.65;for(let j=0;j<7;j++){g.beginPath();for(let k=0;k<160;k++){let a=k*.12+j*.8,r0=k/160*rr*.9,xx=x+Math.cos(a)*r0,yy=y+Math.sin(a)*r0;k?g.lineTo(xx,yy):g.moveTo(xx,yy)}g.stroke()}
+ for(let i=0;i<75;i++){let a=i*2.4,r0=rr*Math.sqrt(i/75);g.fillStyle=i%3?'#d39a58':'#291713';g.beginPath();g.arc(x+Math.cos(a)*r0,y+Math.sin(a)*r0,.7,0,7);g.fill()}
+}
+function bouquet(){let cx=W/2,bottom=H*.79;fl.forEach((f,i)=>{g.strokeStyle='#c4e6a1';g.lineWidth=3;g.shadowColor='#a7f18b';g.shadowBlur=4;g.beginPath();g.moveTo(f.x,f.y+f.r*.6);g.bezierCurveTo(f.x+(i-3)*9,f.y+100,f.x+(i-3)*6,bottom-35,cx,bottom);g.stroke();g.shadowBlur=0;g.fillStyle='#d0eaa7';g.beginPath();g.ellipse(f.x+(i-3)*5,f.y+f.r+34,13,5,(i-3)*.15,0,7);g.fill()});fl.forEach(sunflower);
+ g.fillStyle='#f6b8df';g.strokeStyle='#fff0f7';g.beginPath();g.ellipse(cx,bottom-16,15,4,0,0,7);g.fill();g.stroke();g.strokeStyle='#c5e4a3';g.lineWidth=3;g.beginPath();g.moveTo(cx-5,bottom-12);g.lineTo(cx,bottom+22);g.lineTo(cx+5,bottom-12);g.stroke()}
+function butterfly(b,zoom=1){g.save();g.translate(b.x,b.y);let s=b.s*zoom,flap=Math.max(.14,Math.abs(Math.sin(t*13+b.ph)));g.scale(s,s);
+ let q=g.createLinearGradient(-45,-35,40,35);q.addColorStop(0,b.col);q.addColorStop(.5,'#fff0a8');q.addColorStop(1,'#9b68ff');
+ for(let side of [-1,1]){g.save();g.scale(side*flap,1);g.fillStyle=q;g.strokeStyle='#fff9';g.lineWidth=1;g.beginPath();g.moveTo(0,0);g.bezierCurveTo(-24,-47,-67,-42,-59,-5);g.bezierCurveTo(-55,20,-24,25,-3,9);g.closePath();g.fill();g.stroke();g.strokeStyle='#fff8';g.beginPath();g.moveTo(0,2);g.quadraticCurveTo(-35,-25,-53,-12);g.stroke();g.restore()}
+ g.fillStyle='#49313b';g.beginPath();g.ellipse(0,3,3.2,14,0,0,7);g.fill();g.strokeStyle='#c5a6bd';g.beginPath();g.moveTo(-1,-9);g.quadraticCurveTo(-13,-26,-17,-20);g.moveTo(1,-9);g.quadraticCurveTo(13,-26,17,-20);g.stroke();g.restore()}
+function draw(){t+=.016;g.clearRect(0,0,W,H);let bg=g.createLinearGradient(0,0,0,H*.8);bg.addColorStop(0,'#0c061b');bg.addColorStop(.55,'#1b0730');bg.addColorStop(1,'#55204f');g.fillStyle=bg;g.fillRect(0,0,W,H);
+ let haze=g.createRadialGradient(W*.5,H*.65,5,W*.5,H*.65,H*.6);haze.addColorStop(0,'#a331a044');haze.addColorStop(1,'#290e3900');g.fillStyle=haze;g.fillRect(0,0,W,H);
+ spark.forEach(p=>{g.globalAlpha=p.a*(.35+.65*(.5+.5*Math.sin(t*2+p.ph)));g.fillStyle=p.col;g.shadowColor=p.col;g.shadowBlur=4;g.fillRect(p.x+Math.sin(t*.3+p.ph),p.y,p.s,p.s*1.1)});g.globalAlpha=1;g.shadowBlur=0;
+ tw.forEach(a=>{let q=g.createLinearGradient(a.x,a.base-a.ht,a.x,a.base);q.addColorStop(0,'#bd45ff00');q.addColorStop(.8,'#c04cff10');q.addColorStop(1,'#e84cff44');g.fillStyle=q;g.fillRect(a.x-a.wd,a.base-a.ht,a.wd*2,a.ht)});
+ bouquet();
+ if(!started)but.forEach(b=>{b.x+=b.vx+Math.sin(t+b.ph)*.15;b.y+=b.vy+Math.cos(t+b.ph)*.2;butterfly(b)});
+ else but.forEach(b=>{b.x+=b.fx;b.y+=b.fy;b.z+=b.fz;butterfly(b,1+b.z*.012)});
+ let y=H*.705,q=g.createLinearGradient(0,y-25,0,H);q.addColorStop(0,'#00000000');q.addColorStop(.15,'#000');q.addColorStop(1,'#000');g.fillStyle=q;g.fillRect(0,y-25,W,H-y+25);requestAnimationFrame(draw)}
+c.addEventListener('pointerdown',()=>{if(started)return;started=true;document.body.classList.add('play');but.forEach(b=>{b.fx=(b.x-W/2)*.025+R(-2,2);b.fy=-R(2,5);b.fz=R(2,4);b.s*=1.2})});
+addEventListener('resize',size);size();draw();
+</script></body></html>
